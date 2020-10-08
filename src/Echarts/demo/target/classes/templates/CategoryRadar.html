@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=xi3GMHZVy8vPmk74IT1F5LMgieAoE2XH"></script>
+    <!-- 引入 ECharts 文件 -->
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/echarts.min.js"></script>
+    <script type="text/javascript" src="js/bmap.min.js"></script>
+    <script type="text/javascript" src="js/echarts-gl.min.js"></script>
+    <script type="text/javascript" src="js/ecStat.min.js"></script>
+    <script type="text/javascript" src="js/dataTool.min.js"></script>
+    <script type="text/javascript" src="js/china.js"></script>
+    <script type="text/javascript" src="js/world.js"></script>
+    <script type="text/javascript" src="js/simplex.js"></script>
+    <title>Radar Of Category</title>
+</head>
+<body style="height: 100%; margin: 0">
+<div id="container" style="height: 100%"></div>
+<script type="text/javascript">
+    var dom = document.getElementById("container");
+    var myChart = echarts.init(dom);
+
+    var lineStyle = {
+        normal: {
+            width: 1,
+            opacity: 0.5
+        }
+    };
+
+    option = {
+        backgroundColor: '#CCFFFF',
+        title: {
+            text: 'Category - Radar',
+            left: 'center',
+            textStyle: {
+                color: 'Black'
+            }
+        },
+        legend: {
+            bottom: 5,
+            data: ['重要保持客户','重要发展客户','重要挽留客户','一般客户','低价值客户'],
+            itemGap: 20,
+            textStyle: {
+                color: 'Red',
+                fontSize: 14
+            },
+            //'single'->单选 | 'multiple'->多选 | 'false'->关闭
+            selectedMode: 'multiple'
+        },
+        radar: {
+            indicator: [
+                {name: 'flyTimes', max: 220},
+                {name: 'lastToEnd', max: 750},
+                {name: 'averageDiscount', max: 1.6},
+                {name: 'distance', max: 581000},
+                {name: 'elitePoint', max: 74500},
+                {name: 'days', max: 3500}
+            ],
+            shape: 'circle',
+            splitNumber: 5,
+            name: {
+                textStyle: {
+                    color: 'Blue'
+                }
+            },
+            splitLine: {
+                lineStyle: {
+                    color: [
+                        'Olive', 'Olive',
+                        'Olive', 'Olive',
+                        'Olive', 'Olive'
+                    ].reverse()
+                }
+            },
+            splitArea: {
+                show: false
+            },
+            axisLine: {
+                lineStyle: {
+                    color: '#CCFF00'
+                }
+            }
+        },
+        series: [
+            {
+                name: '重要保持客户',
+                type: 'radar',
+                lineStyle: lineStyle,
+                data : [],
+                symbol: 'none',
+                areaStyle: {
+                    normal: {
+                        opacity: 0.1
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: 'Red'
+                    }
+                }
+            },
+            {
+                name: '重要发展客户',
+                type: 'radar',
+                lineStyle: lineStyle,
+                data: [],
+                symbol: 'none',
+                itemStyle: {
+                    normal: {
+                        color: '#F9713C'
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        opacity: 0.1
+                    }
+                }
+            },
+            {
+                name: '重要挽留客户',
+                type: 'radar',
+                lineStyle: lineStyle,
+                data: [],
+                symbol: 'none',
+                itemStyle: {
+                    normal: {
+                        color: 'Fuchsia'
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        opacity: 0.05
+                    }
+                }
+            },
+            {
+                name: '一般客户',
+                type: 'radar',
+                lineStyle: lineStyle,
+                data: [],
+                symbol: 'none',
+                itemStyle: {
+                    normal: {
+                        color: 'Lime'
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        opacity: 0.05
+                    }
+                }
+            },
+            {
+                name: '低价值客户',
+                type: 'radar',
+                lineStyle: lineStyle,
+                data: [],
+                symbol: 'none',
+                itemStyle: {
+                    normal: {
+                        color: 'Black'
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        opacity: 0.05
+                    }
+                }
+            }
+        ]
+    };
+
+    var categoryData0=[];
+    var categoryData1=[];
+    var categoryData2=[];
+    var categoryData3=[];
+    var categoryData4=[];
+
+    $.ajax({
+        type : 'get',
+        url : 'json/JsonClusterData.json',
+        dataType : 'json',
+        success : function (result) {
+            $.each(result,function (index,item) {
+                var categoryData=[];
+                var kusers=item.kusers;
+                for(var i=0;i<kusers.length;i++){
+                    var kuser=kusers[i];
+                    userData=[kuser.flyTimes,731/kuser.lastToEnd,kuser.averageDiscount
+                        ,kuser.distance,kuser.elitePoint,kuser.days];
+                    categoryData.push(userData);
+                }
+                var category=item.category.toString();
+                if(category=='0'){
+                    categoryData0=categoryData;
+                }else if(category=='1'){
+                    categoryData1=categoryData;
+                }else if(category=='2'){
+                    categoryData2=categoryData;
+                }else if(category=='3'){
+                    categoryData3=categoryData;
+                }else {
+                    categoryData4=categoryData;
+                }
+            });
+            myChart.setOption({
+                series: [
+                    {
+                        data : categoryData1
+                    },
+                    {
+                        data: categoryData0
+                    },
+                    {
+                        data: categoryData4
+                    },
+                    {
+                        data: categoryData3
+                    },
+                    {
+                        data: categoryData2
+                    }
+                ]
+            });
+        },
+        error : function (errorMsg) {
+            alert("Data is Error");
+            myChart.hideLoading();
+        }
+    });
+
+    if (option && typeof option === "object") {
+        myChart.setOption(option);
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+   <head>
+       <meta charset="utf-8">
+       <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=xi3GMHZVy8vPmk74IT1F5LMgieAoE2XH"></script>
+       <!-- 引入 ECharts 文件 -->
+       <script type="text/javascript" src="js/jquery.min.js"></script>
+       <script type="text/javascript" src="js/echarts.min.js"></script>
+       <script type="text/javascript" src="js/bmap.min.js"></script>
+       <script type="text/javascript" src="js/echarts-gl.min.js"></script>
+       <script type="text/javascript" src="js/ecStat.min.js"></script>
+       <script type="text/javascript" src="js/dataTool.min.js"></script>
+       <script type="text/javascript" src="js/china.js"></script>
+       <script type="text/javascript" src="js/world.js"></script>
+       <script type="text/javascript" src="js/simplex.js"></script>
+       <title>Radar Of Users</title>
+</head>
+<body style="height: 100%; margin: 0">
+<div id="container" style="height: 100%"></div>
+<script type="text/javascript">
+var dom = document.getElementById("container");
+var myChart = echarts.init(dom);
+
+var lineStyle = {
+    normal: {
+        width: 1,
+        opacity: 0.5
+    }
+};
+
+option = {
+    backgroundColor: '#CCFFFF',
+    title: {
+        text: 'User - Radar',
+        left: 'center',
+        textStyle: {
+            color: 'Black'
+        }
+    },
+    legend: {
+        bottom: 5,
+        data: ['0','1','2','3','4'],
+        itemGap: 20,
+        textStyle: {
+            color: 'Red',
+            fontSize: 14
+        },
+        //'single'->单选 | 'multiple'->多选 | 'false'->关闭
+        selectedMode: 'multiple'
+    },
+    radar: {
+        indicator: [
+            {name: 'flyTimes', max: 80},
+            {name: 'lastToEnd', max: 51},
+            {name: 'averageDiscount', max: 1},
+            {name: 'distance', max: 123000},
+            {name: 'elitePoint', max: 13000},
+            {name: 'days', max: 2500}
+        ],
+        shape: 'circle',
+        splitNumber: 5,
+        name: {
+            textStyle: {
+                color: 'Blue'
+            }
+        },
+        splitLine: {
+            lineStyle: {
+                color: [
+                    'Olive', 'Olive',
+                    'Olive', 'Olive',
+                    'Olive', 'Olive'
+                ].reverse()
+            }
+        },
+        splitArea: {
+            show: false
+        },
+        axisLine: {
+            lineStyle: {
+                color: '#CCFF00'
+            }
+        }
+    },
+    series: [
+        {
+            name: 'User',
+            type: 'radar',
+            data : [],
+            symbol: 'none',
+            areaStyle: {
+                normal: {
+                    opacity: 0.1
+                }
+            }
+        }
+    ]
+};
+
+var userData=[];
+var Color=['#F9713C','Red','Black','Lime','Fuchsia'];
+
+$.ajax({
+    type : 'get',
+    url : 'json/JsonClusterData.json',
+    dataType : 'json',
+    success : function (result) {
+        $.each(result,function (index,item) {
+            var kmeans=item.kmeans;
+            var category=item.category;
+            userData.push({
+                name:category.toString(),
+                value:[kmeans[0],745.0/kmeans[1],kmeans[2],kmeans[3],kmeans[4],kmeans[5]],
+                lineStyle: {
+                    color: Color[category]
+                },
+                itemStyle: {
+                    normal: {
+                        color: Color[category]
+                    }
+                }
+            });
+        });
+        myChart.setOption({
+            series: [
+                {
+                    data : userData
+                }
+            ]
+        });
+    },
+    error : function (errorMsg) {
+        alert("Data is Error");
+        myChart.hideLoading();
+    }
+});
+
+if (option && typeof option === "object") {
+    myChart.setOption(option);
+}
+
+</script>
+</body>
+</html>
